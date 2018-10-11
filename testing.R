@@ -1,13 +1,38 @@
+library(glue)
 
 installed_packages <- as.character(as.data.frame(installed.packages())$Package)
-
+installed_packages_p <- paste(installed_packages, collapse = ",")
+file <- ".Rprofile"
 pat <- "#libs:"
+
+
 # TODO decide about methodology ,,, do we wanna 
 # TODO do a check if its already been written to Rprofile. ~ DELTE In that case! 
-register_libs <- function(){
-  installed_packages <- paste(as.character(as.data.frame(installed.packages())$Package), collapse = ",")
-  setwd("~") ; shell(paste("echo", pat, installed_packages, ">> .Rprofile"))
-  message(paste0("Libraries addied to .RProfile at ", getwd(), "/.Rprofile"))
+# TODO or append missing items 
+# TODO create central repoo
+# TODO creat permanunent backup solution
+# TODO a function that integrates with a github profile and pulls data from there.. eg .Rprofile 
+
+
+register_libs <- function(file = ".Rprofile"){
+  
+  setwd("~")
+  
+  if(file.exists(file)){ # .Rproilee exists
+    lgl <- grepl(pat, readLines(file))
+    if(any(lgl)){ # libraries have been written already
+      
+      thing <- c(readLines(file), glue("{pat} {installed_packages_p"))
+      writeLines(text = thing, con = ".Rprofile")
+      shell(glue("echo {pat} {thing} > .Rprofile "))
+      
+    } else { # this thingy already exists in .Rprofile
+      shell(glue("echo {pat} {installed_packages} >> .Rprofile"))
+      message(paste0("Libraries appended to .RProfile at ", getwd(), file))  
+    }
+  } # rprofile dont exist
+  
+  
 }
 
 register_libs()
@@ -15,7 +40,6 @@ register_libs()
 
 # find libs too
 
-# TODO a function that integrates with a github profile and pulls data from there.. eg .Rprofile 
 
 
 lines <- readLines("~/.Rprofile")
